@@ -1,29 +1,46 @@
 package com.latam.alura.tienda.prueba;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
+
+import com.latam.alura.tienda.dao.ProductoDao;
+import com.latam.alura.tienda.dao.CategoriaDao;
+import com.latam.alura.tienda.modelo.Categoria;
 import com.latam.alura.tienda.modelo.Producto;
+import com.latam.alura.tienda.utils.JPAUtils;
 
 public class RegistroDeProducto {
 
 	public static void main(String[] args) {
+		registrarProducto();
+		EntityManager em = JPAUtils.getEntityManager();
+		ProductoDao productoDao = new ProductoDao(em);
+		Producto producto = productoDao.consultaPorId(1l);
+		System.out.println(producto.getNombre());
 		
-		Producto celular = new Producto();
-		celular.setNombre("Samsung");
-		celular.setDescripcion("telefono usado");
-		celular.setPrecio(new BigDecimal("1000"));
+		BigDecimal precio = productoDao.consultarPrecioPorNombreDeProducto("Xiaomi");
+		System.out.println(precio);
 		
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory("tienda");
-		EntityManager em = factory.createEntityManager();
+	}
+
+	private static void registrarProducto() {
+		Categoria celulares = new Categoria("CELULARES");
+		Producto celular = new Producto("Xiaomi", "Muy bueno", new BigDecimal("800"), celulares);
+				
+		EntityManager em = JPAUtils.getEntityManager();
+		ProductoDao productoDao = new ProductoDao(em);
+		CategoriaDao categoriaDao = new CategoriaDao(em);
+		
 		em.getTransaction().begin();
-		em.persist(celular);
+				
+		categoriaDao.guardar(celulares);
+		productoDao.guardar(celular);
+		
 		em.getTransaction().commit();
 		em.close();
-
 	}
 
 }
